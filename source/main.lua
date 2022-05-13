@@ -4,14 +4,27 @@ import "CoreLibs/sprites"
 import "CoreLibs/timer"
 
 local gfx = playdate.graphics
+-- local roomSprite = nil
+-- state used to apply current room/scene
+local state = "intro"
 
-local roomSprite = nil
+--this flag is to make sure roomOneSetUp only gets called once, since its in playdate.update()
+roomOneCallFlag = true
 
--- A function to set up our game environment.
+function intro()
+	local introImage = gfx.image.new("Images/titleScreen.png")
+    
+    introSprite = gfx.sprite.new( introImage )
+    introSprite:moveTo( 200, 120 ) -- this is where the center of the sprite is placed; (200,120) is the center of the Playdate screen
+    introSprite:add() -- This is critical!
+
+	if playdate.buttonIsPressed( playdate.kButtonA ) then
+		playdate.graphics.clear()
+		state = "roomOne"
+	end
+end
 
 function roomOneSetUp()
-
-    -- Set up the room sprite.
 
     local roomImage = gfx.image.new("Images/roomOne.png")
     
@@ -21,13 +34,7 @@ function roomOneSetUp()
 
 end
 
-roomOneSetUp()
-
--- This function is called right before every frame is drawn onscreen.
--- Use this function to poll input, run game logic, and move sprites.
-
-function playdate.update()
-
+function roomOne()
 	--check to see if we're in zoomed out state
 	if (playdate.display.getScale() == 1) then
 
@@ -91,6 +98,22 @@ function playdate.update()
 		end
 
 	end
+end
+
+function playdate.update()
+
+	if (state == "intro") then
+		intro()
+	end
+	-- call roomOne and roomOneSetUp after opening sequence
+	if (state == "roomOne") then
+		if roomOneCallFlag == true then
+			roomOneSetUp()
+			roomOneCallFlag = false
+		end
+		roomOne()
+	end
+	
 
     gfx.sprite.update()
 
