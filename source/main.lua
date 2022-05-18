@@ -38,6 +38,7 @@ end
 
 function roomOneSetUp()
 
+	fightEntered = false
     local roomImage = gfx.image.new("Images/roomOne.png")
     local footImage = gfx.image.new("Images/foot.png")
 
@@ -86,14 +87,29 @@ function roomOne()
 
 		end
 
+		if fightEntered then
+			-- TODO: check if A or B was pressed, if so then clear that arm sprite.
+			-- TODO: timer for arms, if its on screen too long you die
+			-- TODO: successful 10 hits move on to next level
+			local BArm = gfx.image.new("Images/BArm.png")
+			local AArm = gfx.image.new("Images/AArm.png")
+			BArm = gfx.sprite.new( BArm )
+			AArm = gfx.sprite.new( AArm )
+			if appearanceRandomizer == 2 then
+				BArm:moveTo( 100, 120 ) 
+				BArm:add()
+			elseif appearanceRandomizer == 3 then
+				AArm:moveTo( 350, 120 ) 
+				AArm:add()
+			end
+		end
+	
 	end
 
 	-- check if we're zoomed. If so, do zoom unique controls
 	if (playdate.display.getScale() == 4) then
+
 		-- d-pad movement
-
-		print(gfx.sprite.getPosition(roomSprite)) --DEBUG
-
 		if playdate.buttonIsPressed( playdate.kButtonUp ) then
 			if y < 360 then
 				roomSprite:moveBy( 0, 2 )
@@ -135,7 +151,24 @@ function roomOne()
 		end
 
 		-- if press a then check area for enemy
-		-- if enemy found then set scale to 1, begin fight sequence and exit zoom
+		if playdate.buttonJustPressed(playdate.kButtonA) then
+			local footX, footY = gfx.sprite.getPosition(footSprite)
+			
+			if footY < 60 and footY > 0 and footX > 24 and footX < 80 then
+				--found the enemy, enter fight sequence
+				--setup
+				playdate.display.setScale(1)
+				local enemyImage = gfx.image.new("Images/enemy.png")
+				enemySprite = gfx.sprite.new( enemyImage )
+				enemySprite:setScale(4)
+    			enemySprite:moveTo( 200, 120 ) 
+    			enemySprite:add()
+				roomSprite:moveTo( 200, 120 )
+				footSprite:moveTo( 130, 420 ) 
+				playdate.wait(100)
+				fightEntered = true
+			end
+		end
 
 		-- exit zoomed state if B button is pressed
 		if playdate.buttonIsPressed(playdate.kButtonB) then
@@ -150,6 +183,8 @@ function roomOne()
 end
 
 function playdate.update()
+
+	appearanceRandomizer = math.random( 1,50 )
 
 	if (state == "intro") then
 		intro()
