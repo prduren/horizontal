@@ -4,7 +4,9 @@ import "CoreLibs/sprites"
 import "CoreLibs/timer"
 
 local gfx = playdate.graphics
--- local roomSprite = nil
+
+--disables crank sounds
+playdate.setCrankSoundsDisabled(disable)
 
 -- state used to apply current room/scene
 local state = "intro"
@@ -13,11 +15,11 @@ local state = "intro"
 roomOneCallFlag = true
 
 -- fade in/out of black
-function fade()
+function fade(fadeTime, --[[optional]]imageSource)
 
-	local blackImage = gfx.image.new("Images/black.png")
+	local blackImage = gfx.image.new(imageSource or "Images/black.png")
 	blackImage:draw(0, 0)
-	playdate.wait(1000)
+	playdate.wait(fadeTime)
 	playdate.graphics.clear()
 
 end
@@ -30,7 +32,7 @@ function intro()
     introSprite:add() -- This is critical!
 
 	if playdate.buttonIsPressed( playdate.kButtonA ) then
-		fade()
+		fade(1000)
 		playdate.graphics.clear()
 		state = "roomOne"
 	end
@@ -38,7 +40,7 @@ end
 
 function roomOneSetUp()
 
-	fightEntered = false
+	enemyFound = false
     local roomImage = gfx.image.new("Images/roomOne.png")
     local footImage = gfx.image.new("Images/foot.png")
 
@@ -58,7 +60,7 @@ function roomOne()
 	x,y = gfx.sprite.getPosition(roomSprite);
 
 	--check to see if we're in zoomed out state
-	if (playdate.display.getScale() == 1) then
+	if (playdate.display.getScale() == 1) and enemyFound == false then
 
 		-- get crank change
 		local change = playdate.getCrankChange(change, acceleratedChange);
@@ -85,23 +87,6 @@ function roomOne()
 			-- wait for a sec so that the up input doesn't propogate down to zoomed state
 			playdate.wait(100)
 
-		end
-
-		if fightEntered then
-			-- TODO: check if A or B was pressed, if so then clear that arm sprite.
-			-- TODO: timer for arms, if its on screen too long you die
-			-- TODO: successful 10 hits move on to next level
-			local BArm = gfx.image.new("Images/BArm.png")
-			local AArm = gfx.image.new("Images/AArm.png")
-			BArm = gfx.sprite.new( BArm )
-			AArm = gfx.sprite.new( AArm )
-			if appearanceRandomizer == 2 then
-				BArm:moveTo( 100, 120 ) 
-				BArm:add()
-			elseif appearanceRandomizer == 3 then
-				AArm:moveTo( 350, 120 ) 
-				AArm:add()
-			end
 		end
 	
 	end
@@ -155,18 +140,18 @@ function roomOne()
 			local footX, footY = gfx.sprite.getPosition(footSprite)
 			
 			if footY < 60 and footY > 0 and footX > 24 and footX < 80 then
-				--found the enemy, enter fight sequence
-				--setup
+				--found the enemy
+				playdate.wait(100)
+				-- TODO: play sound?
 				playdate.display.setScale(1)
 				local enemyImage = gfx.image.new("Images/enemy.png")
 				enemySprite = gfx.sprite.new( enemyImage )
 				enemySprite:setScale(4)
-    			enemySprite:moveTo( 200, 120 ) 
+    			enemySprite:moveTo( 200, 120 )
     			enemySprite:add()
 				roomSprite:moveTo( 200, 120 )
 				footSprite:moveTo( 130, 420 ) 
-				playdate.wait(100)
-				fightEntered = true
+				enemyFound = true
 			end
 		end
 
@@ -180,11 +165,24 @@ function roomOne()
 		end
 
 	end
+
+	if enemyFound then
+
+		local stabImage = gfx.image.new("Images/stab.png")
+		stabSprite = gfx.sprite.new( stabImage )
+		stabSprite:moveTo( 340, 80 )
+		stabSprite:add() 
+
+		if playdate.isCrankDocked() then
+			print("stabbed!")
+			fade(5000, "Images/room2TitleScreen.png")
+		end
+
+	end
+
 end
 
 function playdate.update()
-
-	appearanceRandomizer = math.random( 1,50 )
 
 	if (state == "intro") then
 		intro()
@@ -199,5 +197,6 @@ function playdate.update()
 	end
 	
     gfx.sprite.update()
+	playdate.timer.updateTimers()
 
 end
