@@ -1,7 +1,10 @@
+-- to compile in git bash:
+--  pdc -sdkpath "C:\Users\Parker\Documents\PlaydateSDK" "D:\Repos\Horizontal\source" "D:\Repos\Horizontal.pdx"
 import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
+import "CoreLibs/crank"
 
 local gfx = playdate.graphics
 
@@ -11,8 +14,9 @@ playdate.setCrankSoundsDisabled(disable)
 -- state used to apply current room/scene
 local state = "intro"
 
---this flag is to make sure roomOneSetUp only gets called once, since its in playdate.update()
+-- these flags are to make sure room setup functions only get called once, since they're in playdate.update()
 roomOneCallFlag = true
+roomTwoCallFlag = true
 
 -- fade in/out of black
 function fade(fadeTime, --[[optional]]imageSource)
@@ -20,7 +24,6 @@ function fade(fadeTime, --[[optional]]imageSource)
 	local blackImage = gfx.image.new(imageSource or "Images/black.png")
 	blackImage:draw(0, 0)
 	playdate.wait(fadeTime)
-	playdate.graphics.clear()
 
 end
 
@@ -39,7 +42,8 @@ function intro()
 end
 
 function roomOneSetUp()
-
+	gfx.sprite.removeAll()
+	gfx.clear()
 	enemyFound = false
     local roomImage = gfx.image.new("Images/roomOne.png")
     local footImage = gfx.image.new("Images/foot.png")
@@ -52,6 +56,20 @@ function roomOneSetUp()
     footSprite:moveTo( 130, 420 ) 
     footSprite:add()
 
+end
+
+function roomTwoSetUp()
+	--value to be used to choose which frame to draw
+	roomTwoFrame = 0
+	gfx.sprite.removeAll()
+	gfx.clear()
+	playdate.graphics.setBackgroundColor(gfx.kColorClear)
+	roomTwoAnimation = gfx.imagetable.new("Images/roomTwoAnimation.gif")
+	roomTwoAnimation:getImage(1):draw(0, 0)
+	local bedImage = gfx.image.new("Images/bed.png")
+	bedSprite = gfx.sprite.new( bedImage )
+    bedSprite:moveTo( 200, 220 )
+    bedSprite:add()
 end
 
 function roomOne()
@@ -176,8 +194,28 @@ function roomOne()
 		if playdate.isCrankDocked() then
 			print("stabbed!")
 			fade(5000, "Images/room2TitleScreen.png")
+			-- playdate.wait(5000)
+			state = "roomTwo"
 		end
 
+	end
+
+end
+
+function roomTwo()
+	local tickCounter = playdate.getCrankTicks(8)
+	-- every time a tick gets hit, add 1 to roomTwoFrame
+
+	print(roomTwoFrame)
+
+	if tickCounter == 1 and roomTwoFrame < 8 then
+		roomTwoFrame = roomTwoFrame + 1
+		roomTwoAnimation:getImage(roomTwoFrame):draw(0, 0)
+		bedSprite:moveBy( 0, -5)
+	elseif tickCounter == -1 and roomTwoFrame > 1 then
+		roomTwoFrame = roomTwoFrame - 1
+		roomTwoAnimation:getImage(roomTwoFrame):draw(0, 0)
+		bedSprite:moveBy( 0, 5 )
 	end
 
 end
@@ -195,8 +233,15 @@ function playdate.update()
 		end
 		roomOne()
 	end
+	-- call roomTwo and roomTwoSetup after roomOne end
+	if (state == "roomTwo") then
+		if roomTwoCallFlag == true then
+			roomTwoSetUp()
+			roomTwoCallFlag = false
+		end
+		roomTwo()
+	end
 	
     gfx.sprite.update()
-	playdate.timer.updateTimers()
 
 end
