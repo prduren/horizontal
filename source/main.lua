@@ -8,7 +8,10 @@ import "CoreLibs/crank"
 
 local gfx = playdate.graphics
 
---disables crank sounds
+local textBoxX, textBoxY = 95, 55
+local textX, textY = 95, 55
+
+--disable crank sounds
 playdate.setCrankSoundsDisabled(disable)
 
 -- state used to apply current room/scene
@@ -21,7 +24,7 @@ roomTwoCallFlag = true
 -- fade in/out of black
 function fade(fadeTime, --[[optional]]imageSource)
 
-	local blackImage = gfx.image.new(imageSource or "Images/black.png")
+	local blackImage = gfx.image.new(imageSource or "Images/fade/black.png")
 	blackImage:draw(0, 0)
 	playdate.wait(fadeTime)
 
@@ -56,20 +59,6 @@ function roomOneSetUp()
     footSprite:moveTo( 130, 420 ) 
     footSprite:add()
 
-end
-
-function roomTwoSetUp()
-	--value to be used to choose which frame to draw
-	roomTwoFrame = 0
-	gfx.sprite.removeAll()
-	gfx.clear()
-	playdate.graphics.setBackgroundColor(gfx.kColorClear)
-	roomTwoAnimation = gfx.imagetable.new("Images/roomTwoAnimation.gif")
-	roomTwoAnimation:getImage(1):draw(0, 0)
-	local bedImage = gfx.image.new("Images/bed.png")
-	bedSprite = gfx.sprite.new( bedImage )
-    bedSprite:moveTo( 200, 220 )
-    bedSprite:add()
 end
 
 function roomOne()
@@ -192,9 +181,7 @@ function roomOne()
 		stabSprite:add() 
 
 		if playdate.isCrankDocked() then
-			print("stabbed!")
-			fade(5000, "Images/room2TitleScreen.png")
-			-- playdate.wait(5000)
+			fade(5000, "Images/fade/room2TitleScreen.png")
 			state = "roomTwo"
 		end
 
@@ -202,26 +189,99 @@ function roomOne()
 
 end
 
+function roomTwoSetUp()
+	--to be used to decide when to pop the text box after some idle time in the room
+	textBoxPopCounter = 0
+	--value to be used to choose which frame to draw
+	--incremented by cranking up or down
+	roomTwoFrame = 0
+	gfx.sprite.removeAll()
+	gfx.clear()
+	playdate.graphics.setBackgroundColor(gfx.kColorClear)
+	roomTwoAnimation = gfx.imagetable.new("Images/roomTwoAnimation.gif")
+	roomTwoAnimation:getImage(1):draw(0, 0)
+	local bedImage = gfx.image.new("Images/bed.png")
+	bedSprite = gfx.sprite.new( bedImage )
+    bedSprite:moveTo( 200, 220 )
+    bedSprite:add()
+	local textBoxImage = gfx.image.new("Images/textBox.png")
+	textBoxSprite = gfx.sprite.new( textBoxImage )
+end
+
 function roomTwo()
 	local tickCounter = playdate.getCrankTicks(8)
 	-- every time a tick gets hit, add 1 to roomTwoFrame
-
-	print(roomTwoFrame)
-
+	-- also increment textBoxPopCounter to pop text box after messing around in the room for a bit
 	if tickCounter == 1 and roomTwoFrame < 8 then
+		textBoxPopCounter = textBoxPopCounter + 1
 		roomTwoFrame = roomTwoFrame + 1
 		roomTwoAnimation:getImage(roomTwoFrame):draw(0, 0)
 		bedSprite:moveBy( 0, -5)
 	elseif tickCounter == -1 and roomTwoFrame > 1 then
+		textBoxPopCounter = textBoxPopCounter + 1
 		roomTwoFrame = roomTwoFrame - 1
 		roomTwoAnimation:getImage(roomTwoFrame):draw(0, 0)
 		bedSprite:moveBy( 0, 5 )
 	end
 
+	if textBoxPopCounter == 5 then
+		textBoxSprite:moveTo( textBoxX, textBoxY )
+    	textBoxSprite:add()
+		local text1img = gfx.image.new("Images/text/text1.png")
+		text1 = gfx.sprite.new(text1img)
+		text1:moveTo(textX,textY)
+		text1:add()
+	end
+
+	if textBoxPopCounter == 10 then
+		local text2img = gfx.image.new("Images/text/text2.png")
+		local text2 = gfx.sprite.new(text2img)
+		text2:moveTo(textX,textY + 35)
+	 	text2:add()
+	end
+
+	if textBoxPopCounter == 15 then
+		local text2img = gfx.image.new("Images/text/text2.png")
+		local text2 = gfx.sprite.new(text2img)
+		text2:moveTo(textX + 5,textY + 20)
+	 	text2:add()
+	end
+
+	if textBoxPopCounter == 20 then
+		local text2img = gfx.image.new("Images/text/text2.png")
+		local text2 = gfx.sprite.new(text2img)
+		text2:moveTo(textX + 10,textY + 10)
+	 	text2:add()
+	end
+
+	if textBoxPopCounter == 25 then
+		local text2img = gfx.image.new("Images/text/text2.png")
+		local text2 = gfx.sprite.new(text2img)
+		text2:moveTo(textX - 2,textY - 10)
+	 	text2:add()
+	end
+
+	if textBoxPopCounter == 30 then
+		local text2img = gfx.image.new("Images/text/text2.png")
+		local text2 = gfx.sprite.new(text2img)
+		text2:moveTo(textX + 7,textY + 40)
+	 	text2:add()
+	end
+
+	if textBoxPopCounter == 40 or textBoxPopCounter > 40 then
+		textBoxSprite:setZIndex(30000)
+		local text3img = gfx.image.new("Images/text/text3.png")
+		local text3 = gfx.sprite.new(text3img)
+		text3:setZIndex(30001)
+		text3:moveTo(textX,textY)
+	 	text3:add()
+		playdate.wait(3000)
+		fade(5000, "Images/fade/room3TitleScreen.png")
+	end
+
 end
 
 function playdate.update()
-
 	if (state == "intro") then
 		intro()
 	end
@@ -243,5 +303,6 @@ function playdate.update()
 	end
 	
     gfx.sprite.update()
+	playdate.timer.updateTimers()
 
 end
