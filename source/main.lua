@@ -12,14 +12,21 @@ local textBoxX, textBoxY = 95, 55
 local textX, textY = 95, 55
 
 --disable crank sounds
-playdate.setCrankSoundsDisabled(disable)
+playdate.setCrankSoundsDisabled(true)
 
 -- state used to apply current room/scene
-local state = "intro"
+local state = "roomThree"
 
 -- these flags are to make sure room setup functions only get called once, since they're in playdate.update()
 roomOneCallFlag = true
 roomTwoCallFlag = true
+roomThreeCallFlag = true
+
+--number rounding func
+function round(number, decimals)
+	local power = 10^decimals
+	return math.floor(number * power) / power
+end
 
 -- fade in/out of black
 function fade(fadeTime, --[[optional]]imageSource)
@@ -275,8 +282,40 @@ function roomTwo()
 		text3:setZIndex(30001)
 		text3:moveTo(textX,textY)
 	 	text3:add()
-		playdate.wait(3000)
+	end
+
+	if textBoxPopCounter == 45 or textBoxPopCounter > 45 then
 		fade(5000, "Images/fade/room3TitleScreen.png")
+		state = "roomThree"
+	end
+
+end
+
+function roomThreeSetUp()
+	gfx.sprite.removeAll()
+	gfx.clear()
+end
+
+function roomThree()
+	
+	--accelerometer logic
+	playdate.startAccelerometer()
+	local x, y, z = playdate.readAccelerometer()
+
+	roundedX, roundedY, roundedZ = round(x, 0), round(y, 0), round(z, 0)
+
+	print(roundedX, roundedY, roundedY)
+
+	if roundedX == -1.0 and roundedY == 0.0 and roundedZ == 0.0 then
+		print("put down")
+	end
+
+	if roundedX == 0.0 and roundedY == -1.0 and roundedZ == -1.0 then
+		print("right")
+	end
+
+	if (roundedX == -2.0 and roundedY == 0.0 and roundedZ == 0.0) or (roundedX == -2.0 and roundedY == -1.0 and roundedZ == -1.0) then
+		print("left")
 	end
 
 end
@@ -300,6 +339,14 @@ function playdate.update()
 			roomTwoCallFlag = false
 		end
 		roomTwo()
+	end
+
+	if (state == "roomThree") then
+		if roomThreeCallFlag == true then
+			roomThreeSetUp()
+			roomThreeCallFlag = false
+		end
+		roomThree()
 	end
 	
     gfx.sprite.update()
