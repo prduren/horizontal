@@ -21,6 +21,7 @@ local state = "roomThree"
 roomOneCallFlag = true
 roomTwoCallFlag = true
 roomThreeCallFlag = true
+roomFourCallFlag = true
 
 --number rounding func
 function round(number, decimals)
@@ -231,7 +232,7 @@ function roomTwo()
 		bedSprite:moveBy( 0, 5 )
 	end
 
-	if textBoxPopCounter == 5 then
+	if textBoxPopCounter == 10 then
 		textBoxSprite:moveTo( textBoxX, textBoxY )
     	textBoxSprite:add()
 		local text1img = gfx.image.new("Images/text/text1.png")
@@ -240,42 +241,42 @@ function roomTwo()
 		text1:add()
 	end
 
-	if textBoxPopCounter == 10 then
+	if textBoxPopCounter == 20 then
 		local text2img = gfx.image.new("Images/text/text2.png")
 		local text2 = gfx.sprite.new(text2img)
 		text2:moveTo(textX,textY + 35)
 	 	text2:add()
 	end
 
-	if textBoxPopCounter == 15 then
+	if textBoxPopCounter == 25 then
 		local text2img = gfx.image.new("Images/text/text2.png")
 		local text2 = gfx.sprite.new(text2img)
 		text2:moveTo(textX + 5,textY + 20)
 	 	text2:add()
 	end
 
-	if textBoxPopCounter == 20 then
+	if textBoxPopCounter == 30 then
 		local text2img = gfx.image.new("Images/text/text2.png")
 		local text2 = gfx.sprite.new(text2img)
 		text2:moveTo(textX + 10,textY + 10)
 	 	text2:add()
 	end
 
-	if textBoxPopCounter == 25 then
+	if textBoxPopCounter == 33 then
 		local text2img = gfx.image.new("Images/text/text2.png")
 		local text2 = gfx.sprite.new(text2img)
 		text2:moveTo(textX - 2,textY - 10)
 	 	text2:add()
 	end
 
-	if textBoxPopCounter == 30 then
+	if textBoxPopCounter == 36 then
 		local text2img = gfx.image.new("Images/text/text2.png")
 		local text2 = gfx.sprite.new(text2img)
 		text2:moveTo(textX + 7,textY + 40)
 	 	text2:add()
 	end
 
-	if textBoxPopCounter == 40 or textBoxPopCounter > 40 then
+	if textBoxPopCounter == 38 or textBoxPopCounter > 38 then
 		textBoxSprite:setZIndex(30000)
 		local text3img = gfx.image.new("Images/text/text3.png")
 		local text3 = gfx.sprite.new(text3img)
@@ -294,29 +295,76 @@ end
 function roomThreeSetUp()
 	gfx.sprite.removeAll()
 	gfx.clear()
+	playdate.startAccelerometer()
+	rightSound = playdate.sound.fileplayer.new("sound/squeak.mp3")
+	leftSound = playdate.sound.fileplayer.new("sound/squeak.mp3")
+	faceUpSound = playdate.sound.fileplayer.new("sound/squeak.mp3")
+	speakSound = playdate.sound.fileplayer.new("sound/squeak.mp3")
+	rightSoundPlayed = false
+	leftSoundPlayed = false
+	faceUpSoundPlayed = false
+	speakSoundPlayed = false
+	playdate.wait(1000) --initial wait til first sound
+	faceUpSound:play()
+	faceUpSoundPlayed = true
 end
 
 function roomThree()
-	
-	--accelerometer logic
-	playdate.startAccelerometer()
+
+	--read accelerometer
 	local x, y, z = playdate.readAccelerometer()
 
+	-- round func to round accelerometer values to whole number
 	roundedX, roundedY, roundedZ = round(x, 0), round(y, 0), round(z, 0)
 
-	print(roundedX, roundedY, roundedY)
-
+	--playdate is laying face up
 	if roundedX == -1.0 and roundedY == 0.0 and roundedZ == 0.0 then
-		print("put down")
+		if faceUpSoundPlayed == true then
+			print("you put it faceup!")
+			playdate.wait(2000)
+			leftSound:play()
+			leftSoundPlayed = true
+			faceUpSoundPlayed = false
+		end
 	end
 
 	if roundedX == 0.0 and roundedY == -1.0 and roundedZ == -1.0 then
-		print("right")
+		if rightSoundPlayed == true then
+			print("you turned it right!")
+			playdate.wait(2000)
+			-- TODO: move into speak logic. For now just MVPing it and moving to room 4
+			-- speakSound:play()
+			-- speakSoundPlayed = true
+			rightSoundPlayed = false
+			fade(5000, "Images/fade/room4TitleScreen.png")
+			state = "roomFour"
+		end
 	end
 
 	if (roundedX == -2.0 and roundedY == 0.0 and roundedZ == 0.0) or (roundedX == -2.0 and roundedY == -1.0 and roundedZ == -1.0) then
-		print("left")
+		if leftSoundPlayed == true then
+			print("you turned it left!")
+			playdate.wait(2000)
+			rightSound:play()
+			rightSoundPlayed = true
+			leftSoundPlayed = false
+		end
 	end
+
+	--speak logic
+	if speakSoundPlayed == true then
+		-- speak logic
+	end
+
+end
+
+function roomFourSetUp()
+	gfx.sprite.removeAll()
+	gfx.clear()
+	playdate.stopAccelerometer()
+end
+
+function roomFour()
 
 end
 
@@ -348,8 +396,15 @@ function playdate.update()
 		end
 		roomThree()
 	end
+
+	if (state == "roomFour") then
+		if roomFourCallFlag == true then
+			roomFourSetUp()
+			roomFourCallFlag = false
+		end
+		roomFour()
+	end
 	
     gfx.sprite.update()
-	playdate.timer.updateTimers()
 
 end
