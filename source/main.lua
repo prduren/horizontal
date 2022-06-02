@@ -15,7 +15,7 @@ local textX, textY = 95, 55
 playdate.setCrankSoundsDisabled(true)
 
 -- state used to apply current room/scene
-local state = "roomThree"
+local state = "intro"
 
 -- these flags are to make sure room setup functions only get called once, since they're in playdate.update()
 roomOneCallFlag = true
