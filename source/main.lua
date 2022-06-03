@@ -362,9 +362,39 @@ function roomFourSetUp()
 	gfx.sprite.removeAll()
 	gfx.clear()
 	playdate.stopAccelerometer()
+	roomFourFinished = false
+	roomFourFrame = 0
+	playdate.graphics.setBackgroundColor(gfx.kColorClear)
+	roomFourAnimation = gfx.imagetable.new("Images/roomFourAnimation.gif")
+	roomFourAnimation:getImage(1):draw(0, 0)
+	local textBoxImage = gfx.image.new("Images/textBox.png")
+	textBoxSprite = gfx.sprite.new( textBoxImage )
 end
 
 function roomFour()
+	local roomFourtickCounter = playdate.getCrankTicks(4)
+	-- every time a tick gets hit, add 1 to roomFourFrame
+	if roomFourtickCounter == 1 and roomFourFrame < 30 then
+		roomFourFrame = roomFourFrame + 1
+		roomFourAnimation:getImage(roomFourFrame):draw(0, 0)
+	elseif roomFourtickCounter == -1 and roomFourFrame > 1 then
+		roomFourFrame = roomFourFrame - 1
+		roomFourAnimation:getImage(roomFourFrame):draw(0, 0)
+	end
+
+	if roomFourFrame == 30 then
+		roomFourFinished = true
+	end
+
+	if roomFourFinished then
+		playdate.wait(3000)
+		textBoxSprite:moveTo( textBoxX, textBoxY )
+    	textBoxSprite:add()
+		local text1img = gfx.image.new("Images/text/roomFourText.png")
+		text1 = gfx.sprite.new(text1img)
+		text1:moveTo(textX,textY)
+		text1:add()
+	end
 
 end
 
