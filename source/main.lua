@@ -57,7 +57,7 @@ function intro()
 	end
 
 	if playdate.buttonIsPressed( playdate.kButtonA ) then
-		fade(1000)
+		fade(4000, "Images/fade/room1TitleScreen.png")
 		playdate.graphics.clear()
 		gfx.sprite.removeAll()
 		state = "roomOne"
@@ -212,7 +212,7 @@ function roomOne()
 		stabSprite:add() 
 
 		if playdate.isCrankDocked() then
-			fade(5000, "Images/fade/room2TitleScreen.png")
+			fade(4000, "Images/fade/room2TitleScreen.png")
 			state = "roomTwo"
 		end
 
@@ -309,7 +309,7 @@ function roomTwo()
 	end
 
 	if textBoxPopCounter == 45 or textBoxPopCounter > 45 then
-		fade(5000, "Images/fade/room3TitleScreen.png")
+		fade(4000, "Images/fade/room3TitleScreen.png")
 		state = "roomThree"
 	end
 
@@ -359,7 +359,7 @@ function roomThree()
 			-- speakSound:play()
 			-- speakSoundPlayed = true
 			rightSoundPlayed = false
-			fade(5000, "Images/fade/room4TitleScreen.png")
+			fade(4000, "Images/fade/room4TitleScreen.png")
 			state = "roomFour"
 		end
 	end
@@ -418,7 +418,7 @@ function roomFour()
 		text1:moveTo(textX,textY)
 		text1:add()
 		playdate.wait(3000)
-		fade(5000, "Images/fade/room5TitleScreen.png")
+		fade(4000, "Images/fade/room5TitleScreen.png")
 		state = "roomFive"
 	end
 
