@@ -18,10 +18,12 @@ playdate.setCrankSoundsDisabled(true)
 local state = "intro"
 
 -- these flags are to make sure room setup functions only get called once, since they're in playdate.update()
+introCallFlag = true
 roomOneCallFlag = true
 roomTwoCallFlag = true
 roomThreeCallFlag = true
 roomFourCallFlag = true
+roomFiveCallFlag = true
 
 --number rounding func
 function round(number, decimals)
@@ -38,16 +40,26 @@ function fade(fadeTime, --[[optional]]imageSource)
 
 end
 
+function introSetUp()
+	introFrame = 0
+	playdate.graphics.setBackgroundColor(gfx.kColorClear)
+	introAnimation = gfx.imagetable.new("Images/titleScreen.gif")
+	introAnimation:getImage(1):draw(0, 0)
+end
+
 function intro()
-	local introImage = gfx.image.new("Images/titleScreen.png")
     
-    introSprite = gfx.sprite.new( introImage )
-    introSprite:moveTo( 200, 120 ) -- this is where the center of the sprite is placed; (200,120) is the center of the Playdate screen
-    introSprite:add() -- This is critical!
+	local introTickCounter = playdate.getCrankTicks(6)
+
+	if introTickCounter == 1 and introFrame < 20 then
+		introFrame = introFrame + 1
+		introAnimation:getImage(introFrame):draw(0, 0)
+	end
 
 	if playdate.buttonIsPressed( playdate.kButtonA ) then
 		fade(1000)
 		playdate.graphics.clear()
+		gfx.sprite.removeAll()
 		state = "roomOne"
 	end
 end
@@ -387,19 +399,35 @@ function roomFour()
 	end
 
 	if roomFourFinished then
-		playdate.wait(3000)
+		playdate.wait(1500)
 		textBoxSprite:moveTo( textBoxX, textBoxY )
     	textBoxSprite:add()
 		local text1img = gfx.image.new("Images/text/roomFourText.png")
 		text1 = gfx.sprite.new(text1img)
 		text1:moveTo(textX,textY)
 		text1:add()
+		playdate.wait(3000)
+		fade(5000, "Images/fade/room5TitleScreen.png")
+		state = "roomFive"
 	end
+
+end
+
+function roomFiveSetUp()
+	gfx.sprite.removeAll()
+	gfx.clear()
+end
+
+function roomFive()
 
 end
 
 function playdate.update()
 	if (state == "intro") then
+		if introCallFlag == true then
+			introSetUp()
+			introCallFlag = false
+		end
 		intro()
 	end
 	-- call roomOne and roomOneSetUp after opening sequence
@@ -433,6 +461,14 @@ function playdate.update()
 			roomFourCallFlag = false
 		end
 		roomFour()
+	end
+
+	if (state == "roomFive") then
+		if roomFiveCallFlag == true then
+			roomFiveSetUp()
+			roomFiveCallFlag = false
+		end
+		roomFive()
 	end
 	
     gfx.sprite.update()
