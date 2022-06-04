@@ -121,6 +121,17 @@ function roomOne()
 	-- check if we're zoomed. If so, do zoom unique controls
 	if (playdate.display.getScale() == 4) then
 
+		local change = playdate.getCrankChange(change, acceleratedChange);
+
+		print(x, y)
+		if y < 360 and y > -298 then
+			roomSprite:moveBy( 0, change * .25 )
+			footSprite:moveBy( 0, change * .25)
+		elseif y > 360 or y < -298 then
+			roomSprite:moveBy( 0, change * -1)
+			footSprite:moveBy( 0, change * -1)
+		end
+
 		-- d-pad movement
 		if playdate.buttonIsPressed( playdate.kButtonUp ) then
 			if y < 360 then
