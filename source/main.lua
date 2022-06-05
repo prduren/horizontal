@@ -15,7 +15,7 @@ local textX, textY = 95, 55
 playdate.setCrankSoundsDisabled(true)
 
 -- state used to apply current room/scene
-local state = "intro"
+local state = "roomFour"
 
 -- these flags are to make sure room setup functions only get called once, since they're in playdate.update()
 introCallFlag = true
@@ -319,10 +319,10 @@ function roomThreeSetUp()
 	gfx.sprite.removeAll()
 	gfx.clear()
 	playdate.startAccelerometer()
-	rightSound = playdate.sound.fileplayer.new("sound/squeak.mp3")
-	leftSound = playdate.sound.fileplayer.new("sound/squeak.mp3")
-	faceUpSound = playdate.sound.fileplayer.new("sound/squeak.mp3")
-	speakSound = playdate.sound.fileplayer.new("sound/squeak.mp3")
+	rightSound = playdate.sound.fileplayer.new("sound/pressA.mp3")
+	leftSound = playdate.sound.fileplayer.new("sound/pressA.mp3")
+	faceUpSound = playdate.sound.fileplayer.new("sound/pressA.mp3")
+	speakSound = playdate.sound.fileplayer.new("sound/pressA.mp3")
 	rightSoundPlayed = false
 	leftSoundPlayed = false
 	faceUpSoundPlayed = false
@@ -392,6 +392,7 @@ function roomFourSetUp()
 	roomFourAnimation:getImage(1):draw(0, 0)
 	local textBoxImage = gfx.image.new("Images/textBox.png")
 	textBoxSprite = gfx.sprite.new( textBoxImage )
+	endSound = playdate.sound.fileplayer.new("sound/pressA.mp3")
 end
 
 function roomFour()
@@ -405,21 +406,22 @@ function roomFour()
 		roomFourAnimation:getImage(roomFourFrame):draw(0, 0)
 	end
 
-	if roomFourFrame == 30 then
+	if roomFourFrame == 30 then	
 		roomFourFinished = true
 	end
 
 	if roomFourFinished then
-		playdate.wait(1500)
 		textBoxSprite:moveTo( textBoxX, textBoxY )
     	textBoxSprite:add()
 		local text1img = gfx.image.new("Images/text/roomFourText.png")
 		text1 = gfx.sprite.new(text1img)
 		text1:moveTo(textX,textY)
 		text1:add()
-		playdate.wait(3000)
-		fade(4000, "Images/fade/room5TitleScreen.png")
-		state = "roomFive"
+		endSound:play()
+		if playdate.buttonIsPressed(playdate.kButtonA) then
+			fade(4000, "Images/fade/room5TitleScreen.png")
+			state = "roomFive"
+		end
 	end
 
 end
@@ -483,5 +485,5 @@ function playdate.update()
 	end
 	
     gfx.sprite.update()
-
+	playdate.timer.updateTimers()
 end
