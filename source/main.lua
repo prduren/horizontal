@@ -15,7 +15,7 @@ local textX, textY = 95, 55
 playdate.setCrankSoundsDisabled(true)
 
 -- state used to apply current room/scene
-local state = "roomFour"
+local state = "intro"
 
 -- these flags are to make sure room setup functions only get called once, since they're in playdate.update()
 introCallFlag = true
@@ -24,6 +24,7 @@ roomTwoCallFlag = true
 roomThreeCallFlag = true
 roomFourCallFlag = true
 roomFiveCallFlag = true
+endingCallFlag = true
 
 --number rounding func
 function round(number, decimals)
@@ -45,6 +46,9 @@ function introSetUp()
 	playdate.graphics.setBackgroundColor(gfx.kColorClear)
 	introAnimation = gfx.imagetable.new("Images/titleScreen.gif")
 	introAnimation:getImage(1):draw(0, 0)
+	lockSound = playdate.sound.fileplayer.new("sound/doorLock.mp3")
+	playdate.graphics.setBackgroundColor(gfx.kColorClear)
+	postIntroAnimation = gfx.imagetable.new("Images/introAnimation.gif")
 end
 
 function intro()
@@ -56,7 +60,42 @@ function intro()
 		introAnimation:getImage(introFrame):draw(0, 0)
 	end
 
-	if playdate.buttonIsPressed( playdate.kButtonA ) then
+	if introFrame == 20 then
+		lockSound:play()
+		playdate.graphics.clear()
+		gfx.sprite.removeAll()
+		postIntroAnimation:getImage(2):draw(0, 0)
+		playdate.wait(500)
+		postIntroAnimation:getImage(1):draw(0, 0)
+		playdate.wait(2000)
+		postIntroAnimation:getImage(2):draw(0, 0)
+		playdate.wait(500)
+		postIntroAnimation:getImage(3):draw(0, 0)
+		playdate.wait(2000)
+		postIntroAnimation:getImage(4):draw(0, 0)
+		playdate.wait(1000)
+		postIntroAnimation:getImage(5):draw(0, 0)
+		playdate.wait(1000)
+		postIntroAnimation:getImage(6):draw(0, 0)
+		playdate.wait(500)
+		postIntroAnimation:getImage(7):draw(0, 0)
+		playdate.wait(250)
+		postIntroAnimation:getImage(8):draw(0, 0)
+		playdate.wait(500)
+		postIntroAnimation:getImage(9):draw(0, 0)
+		playdate.wait(2000)
+		postIntroAnimation:getImage(10):draw(0, 0)
+		playdate.wait(2000)
+		postIntroAnimation:getImage(11):draw(0, 0)
+		playdate.wait(500)
+		postIntroAnimation:getImage(12):draw(0, 0)
+		playdate.wait(1000)
+		postIntroAnimation:getImage(13):draw(0, 0)
+		playdate.wait(1000)
+		postIntroAnimation:getImage(14):draw(0, 0)
+		playdate.wait(1000)
+		postIntroAnimation:getImage(15):draw(0, 0)
+		playdate.wait(500)
 		fade(4000, "Images/fade/room1TitleScreen.png")
 		playdate.graphics.clear()
 		gfx.sprite.removeAll()
@@ -319,10 +358,10 @@ function roomThreeSetUp()
 	gfx.sprite.removeAll()
 	gfx.clear()
 	playdate.startAccelerometer()
-	rightSound = playdate.sound.fileplayer.new("sound/pressA.mp3")
-	leftSound = playdate.sound.fileplayer.new("sound/pressA.mp3")
-	faceUpSound = playdate.sound.fileplayer.new("sound/pressA.mp3")
-	speakSound = playdate.sound.fileplayer.new("sound/pressA.mp3")
+	rightSound = playdate.sound.fileplayer.new("sound/right.mp3")
+	leftSound = playdate.sound.fileplayer.new("sound/leftt.mp3")
+	faceUpSound = playdate.sound.fileplayer.new("sound/putItDownNew.mp3")
+	speakSound = playdate.sound.fileplayer.new("sound/find.mp3")
 	rightSoundPlayed = false
 	leftSoundPlayed = false
 	faceUpSoundPlayed = false
@@ -355,9 +394,8 @@ function roomThree()
 		if rightSoundPlayed == true then
 			print("you turned it right!")
 			playdate.wait(2000)
-			-- TODO: move into speak logic. For now just MVPing it and moving to room 4
-			-- speakSound:play()
-			-- speakSoundPlayed = true
+			speakSound:play()
+			speakSoundPlayed = true
 			rightSoundPlayed = false
 			fade(4000, "Images/fade/room4TitleScreen.png")
 			state = "roomFour"
@@ -368,15 +406,11 @@ function roomThree()
 		if leftSoundPlayed == true then
 			print("you turned it left!")
 			playdate.wait(2000)
+			leftSound:stop()
 			rightSound:play()
 			rightSoundPlayed = true
 			leftSoundPlayed = false
 		end
-	end
-
-	--speak logic
-	if speakSoundPlayed == true then
-		-- speak logic
 	end
 
 end
@@ -393,6 +427,7 @@ function roomFourSetUp()
 	local textBoxImage = gfx.image.new("Images/textBox.png")
 	textBoxSprite = gfx.sprite.new( textBoxImage )
 	endSound = playdate.sound.fileplayer.new("sound/pressA.mp3")
+	crashSound = playdate.sound.fileplayer.new("sound/crash.mp3")
 end
 
 function roomFour()
@@ -418,7 +453,10 @@ function roomFour()
 		text1:moveTo(textX,textY)
 		text1:add()
 		endSound:play()
+		crashSound:play()
 		if playdate.buttonIsPressed(playdate.kButtonA) then
+			endSound:stop()
+			crashSound:stop()
 			fade(4000, "Images/fade/room5TitleScreen.png")
 			state = "roomFive"
 		end
@@ -429,10 +467,68 @@ end
 function roomFiveSetUp()
 	gfx.sprite.removeAll()
 	gfx.clear()
+	roomFiveFrame = 0
+	roomFivePopCounter = 0
+	playdate.graphics.setBackgroundColor(gfx.kColorClear)
+	roomFiveImage = gfx.image.new("Images/roomFive.png")
+	roomFiveImage:draw(0,0)
+	darknessOverlay = gfx.imagetable.new("Images/darkness_overlay.gif")
+	darknessOverlay:getImage(1):draw(0, 0)
+	newEnemyImg = gfx.image.new("Images/roomFiveEnemy.png")
+	newEnemy = gfx.sprite.new(newEnemyImg)
 end
 
 function roomFive()
+	local roomFivetickCounter = playdate.getCrankTicks(8)
+	-- every time a tick gets hit, add 1 to roomFourFrame
+	if roomFivetickCounter == 1 and roomFiveFrame < 8 then
+		roomFiveFrame = roomFiveFrame + 1
+		roomFivePopCounter = roomFivePopCounter + 1
+		gfx.sprite.removeAll()
+		gfx.clear()
+		roomFiveImage:draw(0,0)
+		darknessOverlay:getImage(roomFiveFrame):draw(0, 0)
+	elseif roomFivetickCounter == -1 and roomFiveFrame > 1 then
+		roomFiveFrame = roomFiveFrame - 1
+		darknessOverlay:getImage(roomFiveFrame):draw(0, 0)
+	end
 
+	if roomFivePopCounter > 14 and roomFivePopCounter < 16 then
+		newEnemy:moveTo(120, 60)
+		newEnemy:add()
+	elseif roomFivePopCounter > 27 and roomFivePopCounter < 30 then
+		newEnemy:setScale(2)
+		newEnemy:moveTo(160, 100)
+		newEnemy:add()
+	elseif roomFivePopCounter > 49 and roomFivePopCounter < 55 then
+		newEnemy:setScale(7)
+		newEnemy:moveTo(200, 120)
+		newEnemy:add()
+	elseif roomFivePopCounter == 55 then
+		fade(4000, "Images/fade/endingTitleScreen.png")
+		state = "ending"
+	end
+
+end
+
+function endingSetUp()
+	gfx.sprite.removeAll()
+	gfx.clear()
+	endingCounter = 0
+	playdate.graphics.setBackgroundColor(gfx.kColorBlack)
+	textBoxImage = gfx.image.new("Images/textBox.png")
+	textBoxSprite = gfx.sprite.new( textBoxImage )
+	endtext1img = gfx.image.new("Images/text/endtext1.png")
+	endtext1 = gfx.sprite.new(endtext1img)
+	textBoxSprite:moveTo( textBoxX, textBoxY )
+    textBoxSprite:add()
+end
+
+function ending()
+	if endingCounter == 0 then
+		endtext1:moveTo(textX,textY)
+		endtext1:add()
+	end
 end
 
 function playdate.update()
@@ -482,6 +578,14 @@ function playdate.update()
 			roomFiveCallFlag = false
 		end
 		roomFive()
+	end
+
+	if (state == "ending") then
+		if endingCallFlag == true then
+			endingSetUp()
+			endingCallFlag = false
+		end
+		ending()
 	end
 	
     gfx.sprite.update()
