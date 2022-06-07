@@ -26,6 +26,9 @@ roomFourCallFlag = true
 roomFiveCallFlag = true
 endingCallFlag = true
 
+--gong sound
+-- gongSound = playdate.sound.fileplayer.new("sound/gong.mp3")
+
 --number rounding func
 function round(number, decimals)
 	local power = 10^decimals
@@ -37,7 +40,9 @@ function fade(fadeTime, --[[optional]]imageSource)
 
 	local blackImage = gfx.image.new(imageSource or "Images/fade/black.png")
 	blackImage:draw(0, 0)
+	-- gongSound:play()
 	playdate.wait(fadeTime)
+	-- gongSound:pause()
 
 end
 
@@ -310,35 +315,35 @@ function roomTwo()
 	 	text2:add()
 	end
 
-	if textBoxPopCounter == 25 then
+	if textBoxPopCounter == 30 then
 		local text2img = gfx.image.new("Images/text/text2.png")
 		local text2 = gfx.sprite.new(text2img)
 		text2:moveTo(textX + 5,textY + 20)
 	 	text2:add()
 	end
 
-	if textBoxPopCounter == 30 then
+	if textBoxPopCounter == 40 then
 		local text2img = gfx.image.new("Images/text/text2.png")
 		local text2 = gfx.sprite.new(text2img)
 		text2:moveTo(textX + 10,textY + 10)
 	 	text2:add()
 	end
 
-	if textBoxPopCounter == 33 then
+	if textBoxPopCounter == 45 then
 		local text2img = gfx.image.new("Images/text/text2.png")
 		local text2 = gfx.sprite.new(text2img)
 		text2:moveTo(textX - 2,textY - 10)
 	 	text2:add()
 	end
 
-	if textBoxPopCounter == 36 then
+	if textBoxPopCounter == 50 then
 		local text2img = gfx.image.new("Images/text/text2.png")
 		local text2 = gfx.sprite.new(text2img)
 		text2:moveTo(textX + 7,textY + 40)
 	 	text2:add()
 	end
 
-	if textBoxPopCounter == 38 or textBoxPopCounter > 38 then
+	if textBoxPopCounter == 55 or textBoxPopCounter > 55 then
 		textBoxSprite:setZIndex(30000)
 		local text3img = gfx.image.new("Images/text/text3.png")
 		local text3 = gfx.sprite.new(text3img)
@@ -347,7 +352,7 @@ function roomTwo()
 	 	text3:add()
 	end
 
-	if textBoxPopCounter == 45 or textBoxPopCounter > 45 then
+	if textBoxPopCounter == 65 or textBoxPopCounter > 65 then
 		fade(4000, "Images/fade/room3TitleScreen.png")
 		state = "roomThree"
 	end
@@ -406,7 +411,7 @@ function roomThree()
 		if leftSoundPlayed == true then
 			print("you turned it left!")
 			playdate.wait(2000)
-			leftSound:stop()
+			leftSound:pause()
 			rightSound:play()
 			rightSoundPlayed = true
 			leftSoundPlayed = false
@@ -455,8 +460,8 @@ function roomFour()
 		endSound:play()
 		crashSound:play()
 		if playdate.buttonIsPressed(playdate.kButtonA) then
-			endSound:stop()
-			crashSound:stop()
+			endSound:pause()
+			crashSound:pause()
 			fade(4000, "Images/fade/room5TitleScreen.png")
 			state = "roomFive"
 		end
@@ -520,15 +525,79 @@ function endingSetUp()
 	textBoxSprite = gfx.sprite.new( textBoxImage )
 	endtext1img = gfx.image.new("Images/text/endtext1.png")
 	endtext1 = gfx.sprite.new(endtext1img)
+	endtext2img = gfx.image.new("Images/work.png")
+	endtext2 = gfx.sprite.new(endtext2img)
+	endtext3img = gfx.image.new("Images/text/endText2.png")
+	blackimg = gfx.image.new("Images/fade/black.png")
+	keyRing = gfx.image.new("Images/keyRing.png")
+	lockUp = gfx.image.new("Images/forgetToLockUp.png")
+	endCard = gfx.image.new("Images/endCard.png")
+	violin = playdate.sound.fileplayer.new("sound/violin.mp3")
 	textBoxSprite:moveTo( textBoxX, textBoxY )
     textBoxSprite:add()
 end
 
 function ending()
 	if endingCounter == 0 then
-		endtext1:moveTo(textX,textY)
-		endtext1:add()
+		--endtext1:moveTo(textX,textY)
+		--endtext1:add()
+		textBoxImage:draw(15, 15)
+		endtext1img:draw(20, 20)
+		endingCounter = endingCounter + 1
+		playdate.wait(2000)
 	end
+
+	if endingCounter == 1 then
+		endtext2img:draw(0,0)
+		playdate.wait(2000)
+		endingCounter = endingCounter + 1
+	end
+
+	if endingCounter == 2 then
+		blackimg:draw(0,0)
+		playdate.wait(1000)
+		endingCounter = endingCounter + 1
+	end
+
+	if endingCounter == 3 then
+		keyRing:draw(0,0)
+		playdate.wait(3000)
+		gfx.sprite.removeAll()
+		gfx.clear()
+		endingCounter = endingCounter + 1
+	end
+
+	if endingCounter == 4 then
+		textBoxImage:draw(15, 15)
+		endtext3img:draw(20, 20)
+		playdate.wait(2000)
+		endingCounter = endingCounter + 1
+	end
+
+	if endingCounter == 5 then
+		blackimg:draw(0,0)
+		playdate.wait(1000)
+		endingCounter = endingCounter + 1
+	end
+
+	if endingCounter == 6 then
+		lockUp:draw(0, 0)
+		violin:play()
+		playdate.wait(3000)
+		endingCounter = endingCounter + 1
+	end
+
+	if endingCounter == 7 then
+		blackimg:draw(0,0)
+		playdate.wait(2000)
+		endingCounter = endingCounter + 1
+	end
+
+	if endingCounter == 8 then
+		endCard:draw(0,0)
+		playdate.wait(10000)
+	end
+
 end
 
 function playdate.update()
