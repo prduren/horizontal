@@ -5,6 +5,7 @@ import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
 import "CoreLibs/crank"
+import "CoreLibs/ui"
 
 local gfx = playdate.graphics
 
@@ -101,7 +102,7 @@ function intro()
 		playdate.wait(1000)
 		postIntroAnimation:getImage(15):draw(0, 0)
 		playdate.wait(500)
-		fade(4000, "Images/fade/room1TitleScreen.png")
+		fade(5000, "Images/fade/room1TitleScreen.png")
 		playdate.graphics.clear()
 		gfx.sprite.removeAll()
 		state = "roomOne"
@@ -112,6 +113,7 @@ function roomOneSetUp()
 	gfx.sprite.removeAll()
 	gfx.clear()
 	enemyFound = false
+	tempCrankFlag = true
     local roomImage = gfx.image.new("Images/roomOne.png")
     local footImage = gfx.image.new("Images/foot.png")
 
@@ -252,8 +254,8 @@ function roomOne()
 
 		local stabImage = gfx.image.new("Images/stab.png")
 		stabSprite = gfx.sprite.new( stabImage )
-		stabSprite:moveTo( 340, 80 )
-		stabSprite:add() 
+		stabSprite:moveTo( 340, 120 )
+		stabSprite:add()
 
 		if playdate.isCrankDocked() then
 			fade(4000, "Images/fade/room2TitleScreen.png")
@@ -275,6 +277,7 @@ function roomTwoSetUp()
 	playdate.graphics.setBackgroundColor(gfx.kColorClear)
 	roomTwoAnimation = gfx.imagetable.new("Images/roomTwoAnimation.gif")
 	roomTwoAnimation:getImage(1):draw(0, 0)
+	bedAnimation = gfx.imagetable.new("Images/intoBed.gif")
 	local bedImage = gfx.image.new("Images/bed.png")
 	bedSprite = gfx.sprite.new( bedImage )
     bedSprite:moveTo( 200, 220 )
@@ -353,6 +356,18 @@ function roomTwo()
 	end
 
 	if textBoxPopCounter == 65 or textBoxPopCounter > 65 then
+		bedAnimation:getImage(1):draw(0, 0)
+		playdate.wait(1000)
+		bedAnimation:getImage(2):draw(0, 0)
+		playdate.wait(1000)
+		bedAnimation:getImage(3):draw(0, 0)
+		playdate.wait(1000)
+		bedAnimation:getImage(4):draw(0, 0)
+		playdate.wait(1000)
+		bedAnimation:getImage(5):draw(0, 0)
+		playdate.wait(1000)
+		bedAnimation:getImage(6):draw(0, 0)
+		playdate.wait(1000)
 		fade(4000, "Images/fade/room3TitleScreen.png")
 		state = "roomThree"
 	end
@@ -385,7 +400,7 @@ function roomThree()
 	roundedX, roundedY, roundedZ = round(x, 0), round(y, 0), round(z, 0)
 
 	--playdate is laying face up
-	if roundedX == -1.0 and roundedY == 0.0 and roundedZ == 0.0 then
+	if roundedX == 0.0 and roundedY == 0.0 and roundedZ == 1.0 then
 		if faceUpSoundPlayed == true then
 			print("you put it faceup!")
 			playdate.wait(2000)
@@ -395,10 +410,10 @@ function roomThree()
 		end
 	end
 
-	if roundedX == 0.0 and roundedY == -1.0 and roundedZ == -1.0 then
+	if roundedX == 1.0 and roundedY == 0.0 and roundedZ == 0.0 then
 		if rightSoundPlayed == true then
 			print("you turned it right!")
-			playdate.wait(2000)
+			playdate.wait(1000)
 			speakSound:play()
 			speakSoundPlayed = true
 			rightSoundPlayed = false
@@ -407,7 +422,7 @@ function roomThree()
 		end
 	end
 
-	if (roundedX == -2.0 and roundedY == 0.0 and roundedZ == 0.0) or (roundedX == -2.0 and roundedY == -1.0 and roundedZ == -1.0) then
+	if (roundedX == -1.0 and roundedY == 0.0 and roundedZ == 0.0) then
 		if leftSoundPlayed == true then
 			print("you turned it left!")
 			playdate.wait(2000)
@@ -659,4 +674,5 @@ function playdate.update()
 	
     gfx.sprite.update()
 	playdate.timer.updateTimers()
+
 end
